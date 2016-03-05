@@ -1,0 +1,21 @@
+{
+  "ecmaFeatures": {
+    "classes": true
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "parser": "babel-eslint",
+  "rules": {
+    "eqeqeq": 2,
+    "no-debugger": 2,
+    "valid-typeof": 2,
+    "curly": 2,
+    "no-undef": 2,
+    "no-unused-vars": 1,
+    "no-this-before-super": 2,
+    "jsx-quotes": [1, "prefer-single"],
+    "no-var": 2
+  }
+}
