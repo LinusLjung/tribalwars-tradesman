@@ -3,11 +3,15 @@ var webpack = require('webpack'),
 
 module.exports = {
 	context: __dirname + '/src',
-	entry: './app.js',
+	entry: {
+		content: './content.js',
+		popup: './popup.js'
+	},
 	output: {
 		path: __dirname + '/build',
-		filename: 'content.js'
+		filename: '[name].js'
 	},
+	devtool: 'source-map',
 	module: {
 		loaders: [
 			{
@@ -28,5 +32,8 @@ module.exports = {
 		new webpack.ProvidePlugin({
 			fetch: 'imports?this=>global!exports?global.fetch!whatwg-fetch'
 		})
-	]
+	],
+	externals: {
+		chrome: 'chrome'
+	}
 };
