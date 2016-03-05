@@ -1,6 +1,10 @@
 import chrome from 'chrome';
 
 class Message {
+	static addListener(listener) {
+		chrome.runtime.onMessage.addListener(listener);
+	}
+
 	constructor(type, message) {
 		this.type = type;
 		this.message = message;

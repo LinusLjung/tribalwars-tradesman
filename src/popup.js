@@ -1,20 +1,50 @@
-import chrome from 'chrome';
+import State from './lib/state';
+import Message from './chrome/message';
+import view from './popup.jade';
 
-class Popup {
+class Popup extends State {
 	static defaultState = {
-		villages: []
+		worlds: {}
 	};
 
-	construcor() {
-		chrome.runtime.onMessage.addListener(function (request) {
-			switch (request.type) {
-				case 'villages':
-					break;
-			}
-		});
+	constructor() {
+		super();
+
+		const message = new Message('getVillages');
+
+		message.responseCallback = (response) => {
+			this.setState({
+				worlds: Object.assign(this.state.worlds, response)
+			});
+		};
+
+		message.send();
+
+		this.containerRender = document.body.querySelector('[data-hook=render]');
+
+		this.render();
+	}
+
+	onStateChange() {
+		this.render();
 	}
 
 	render() {
+		this.containerRender.innerHTML = view({
+			worlds: this.state.worlds
+		});
+
+		this.afterRender();
+	}
+
+	afterRender() {
+		this.containerRender.querySelector('#test').addEventListener('click', (e) => {
+			console.log(e.target);
+			this.fetchVillages();
+		}, false);
+	}
+
+	fetchVillages() {
 	}
 }
 

@@ -5,7 +5,8 @@ module.exports = {
 	context: __dirname + '/src',
 	entry: {
 		content: './content.js',
-		popup: './popup.js'
+		popup: './popup.js',
+		background: './background.js'
 	},
 	output: {
 		path: __dirname + '/build',
@@ -15,16 +16,20 @@ module.exports = {
 	module: {
 		loaders: [
 			{
+				test: /\.js$/,
 				loader: 'babel-loader',
 				include: [
 					path.resolve(__dirname, 'src'),
 				],
-				test: /\.js$/,
 
 				query: {
 					plugins: ['transform-runtime'],
 					presets: ['es2015', 'stage-0']
 				}
+			},
+			{
+				test: /\.jade$/,
+				loader: 'jade'
 			}
 		]
 	},

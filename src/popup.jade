@@ -1,0 +1,9 @@
+h1 Test jade #{test}
+
+button#test test
+
+div
+	each world in worlds
+		ul
+			each village in world.villages
+				li= village.name
