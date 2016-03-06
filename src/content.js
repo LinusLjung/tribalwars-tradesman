@@ -26,27 +26,36 @@ if (window.location.pathname === '/game.php') {
 
 function buildVillageData() {
 	return new Promise((resolve) => {
-		overview.getVillageList().then((villages) => {
-			function tryToResolve(villagesData) {
-				if (villagesData.length === villages.length) {
-					resolve(villagesData);
+		const villageList = window.localStorage.getItem('twtVillages');
+
+		if (villageList === null) {
+			overview.getVillageList().then((villages) => {
+				function tryToResolve(villagesData) {
+					if (villagesData.length === villages.length) {
+						window.localStorage.setItem('twtVillages', JSON.stringify(villagesData));
+						console.log('Saved to localstorage:', villagesData);
+						resolve(villagesData);
+					}
 				}
-			}
 
-			const villagesData = [];
+				const villagesData = [];
 
-			for (let villageData of villages) {
-				const village = new Village(villageData.id);
+				for (let villageData of villages) {
+					const village = new Village(villageData.id);
 
-				village.getBuildings().then((buildings) => {
-					villageData.buildings = buildings;
+					village.getBuildings().then((buildings) => {
+						villageData.buildings = buildings;
 
-					villagesData.push(villageData);
+						villagesData.push(villageData);
 
-					tryToResolve(villagesData);
-				});
-			}
-		});
+						tryToResolve(villagesData);
+					});
+				}
+			});
+		} else {
+			console.log('Fetched from localstorage:', JSON.parse(villageList));
+			resolve(JSON.parse(villageList));
+		}
 	});
 }
 

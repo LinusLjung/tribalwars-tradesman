@@ -50,11 +50,15 @@
 	
 	var _getIterator3 = _interopRequireDefault(_getIterator2);
 	
-	var _promise = __webpack_require__(68);
+	var _stringify = __webpack_require__(68);
+	
+	var _stringify2 = _interopRequireDefault(_stringify);
+	
+	var _promise = __webpack_require__(70);
 	
 	var _promise2 = _interopRequireDefault(_promise);
 	
-	var _overview = __webpack_require__(85);
+	var _overview = __webpack_require__(87);
 	
 	var _overview2 = _interopRequireDefault(_overview);
 	
@@ -92,52 +96,61 @@
 	
 	function buildVillageData() {
 		return new _promise2.default(function (resolve) {
-			_overview2.default.getVillageList().then(function (villages) {
-				function tryToResolve(villagesData) {
-					if (villagesData.length === villages.length) {
-						resolve(villagesData);
+			var villageList = window.localStorage.getItem('twtVillages');
+	
+			if (villageList === null) {
+				_overview2.default.getVillageList().then(function (villages) {
+					function tryToResolve(villagesData) {
+						if (villagesData.length === villages.length) {
+							window.localStorage.setItem('twtVillages', (0, _stringify2.default)(villagesData));
+							console.log('Saved to localstorage:', villagesData);
+							resolve(villagesData);
+						}
 					}
-				}
 	
-				var villagesData = [];
+					var villagesData = [];
 	
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
+					var _iteratorNormalCompletion = true;
+					var _didIteratorError = false;
+					var _iteratorError = undefined;
 	
-				try {
-					var _loop = function _loop() {
-						var villageData = _step.value;
-	
-						var village = new _village2.default(villageData.id);
-	
-						village.getBuildings().then(function (buildings) {
-							villageData.buildings = buildings;
-	
-							villagesData.push(villageData);
-	
-							tryToResolve(villagesData);
-						});
-					};
-	
-					for (var _iterator = (0, _getIterator3.default)(villages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						_loop();
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
 					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
+						var _loop = function _loop() {
+							var villageData = _step.value;
+	
+							var village = new _village2.default(villageData.id);
+	
+							village.getBuildings().then(function (buildings) {
+								villageData.buildings = buildings;
+	
+								villagesData.push(villageData);
+	
+								tryToResolve(villagesData);
+							});
+						};
+	
+						for (var _iterator = (0, _getIterator3.default)(villages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+							_loop();
 						}
+					} catch (err) {
+						_didIteratorError = true;
+						_iteratorError = err;
 					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
+						try {
+							if (!_iteratorNormalCompletion && _iterator.return) {
+								_iterator.return();
+							}
+						} finally {
+							if (_didIteratorError) {
+								throw _iteratorError;
+							}
 						}
 					}
-				}
-			});
+				});
+			} else {
+				console.log('Fetched from localstorage:', JSON.parse(villageList));
+				resolve(JSON.parse(villageList));
+			}
 		});
 	}
 	
@@ -1079,20 +1092,36 @@
 /* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(70);
-	__webpack_require__(63);
-	__webpack_require__(48);
-	__webpack_require__(71);
-	module.exports = __webpack_require__(7).Promise;
+	var core  = __webpack_require__(7)
+	  , $JSON = core.JSON || (core.JSON = {stringify: JSON.stringify});
+	module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
+	  return $JSON.stringify.apply($JSON, arguments);
+	};
 
 /***/ },
 /* 70 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(71), __esModule: true };
+
+/***/ },
+/* 71 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(72);
+	__webpack_require__(63);
+	__webpack_require__(48);
+	__webpack_require__(73);
+	module.exports = __webpack_require__(7).Promise;
+
+/***/ },
+/* 72 */
 /***/ function(module, exports) {
 
 
 
 /***/ },
-/* 71 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1104,12 +1133,12 @@
 	  , isObject           = __webpack_require__(13)
 	  , anObject           = __webpack_require__(12)
 	  , aFunction          = __webpack_require__(9)
-	  , anInstance         = __webpack_require__(72)
-	  , forOf              = __webpack_require__(73)
-	  , setProto           = __webpack_require__(76).set
-	  , speciesConstructor = __webpack_require__(78)
-	  , task               = __webpack_require__(79).set
-	  , microtask          = __webpack_require__(81)
+	  , anInstance         = __webpack_require__(74)
+	  , forOf              = __webpack_require__(75)
+	  , setProto           = __webpack_require__(78).set
+	  , speciesConstructor = __webpack_require__(80)
+	  , task               = __webpack_require__(81).set
+	  , microtask          = __webpack_require__(83)
 	  , PROMISE            = 'Promise'
 	  , TypeError          = global.TypeError
 	  , process            = global.process
@@ -1294,7 +1323,7 @@
 	    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
 	    this._n = false;          // <- notify
 	  };
-	  Internal.prototype = __webpack_require__(82)($Promise.prototype, {
+	  Internal.prototype = __webpack_require__(84)($Promise.prototype, {
 	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
 	    then: function then(onFulfilled, onRejected){
 	      var reaction = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -1320,7 +1349,7 @@
 	
 	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
 	__webpack_require__(60)($Promise, PROMISE);
-	__webpack_require__(83)(PROMISE);
+	__webpack_require__(85)(PROMISE);
 	Wrapper = __webpack_require__(7)[PROMISE];
 	
 	// statics
@@ -1344,7 +1373,7 @@
 	    return capability.promise;
 	  }
 	});
-	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(84)(function(iter){
+	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(86)(function(iter){
 	  $Promise.all(iter)['catch'](empty);
 	})), PROMISE, {
 	  // 25.4.4.1 Promise.all(iterable)
@@ -1390,7 +1419,7 @@
 	});
 
 /***/ },
-/* 72 */
+/* 74 */
 /***/ function(module, exports) {
 
 	module.exports = function(it, Constructor, name, forbiddenField){
@@ -1400,12 +1429,12 @@
 	};
 
 /***/ },
-/* 73 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx         = __webpack_require__(8)
-	  , call        = __webpack_require__(74)
-	  , isArrayIter = __webpack_require__(75)
+	  , call        = __webpack_require__(76)
+	  , isArrayIter = __webpack_require__(77)
 	  , anObject    = __webpack_require__(12)
 	  , toLength    = __webpack_require__(32)
 	  , getIterFn   = __webpack_require__(66);
@@ -1424,7 +1453,7 @@
 	};
 
 /***/ },
-/* 74 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// call something on iterator step with safe closing on error
@@ -1441,7 +1470,7 @@
 	};
 
 /***/ },
-/* 75 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// check on default Array iterator
@@ -1454,7 +1483,7 @@
 	};
 
 /***/ },
-/* 76 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Works with __proto__ only. Old v8 can't work with null proto objects.
@@ -1469,7 +1498,7 @@
 	  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
 	    function(test, buggy, set){
 	      try {
-	        set = __webpack_require__(8)(Function.call, __webpack_require__(77).f(Object.prototype, '__proto__').set, 2);
+	        set = __webpack_require__(8)(Function.call, __webpack_require__(79).f(Object.prototype, '__proto__').set, 2);
 	        set(test, []);
 	        buggy = !(test instanceof Array);
 	      } catch(e){ buggy = true; }
@@ -1484,7 +1513,7 @@
 	};
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var pIE            = __webpack_require__(40)
@@ -1505,7 +1534,7 @@
 	};
 
 /***/ },
-/* 78 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -1518,11 +1547,11 @@
 	};
 
 /***/ },
-/* 79 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx                = __webpack_require__(8)
-	  , invoke             = __webpack_require__(80)
+	  , invoke             = __webpack_require__(82)
 	  , html               = __webpack_require__(59)
 	  , cel                = __webpack_require__(17)
 	  , global             = __webpack_require__(6)
@@ -1598,7 +1627,7 @@
 	};
 
 /***/ },
-/* 80 */
+/* 82 */
 /***/ function(module, exports) {
 
 	// fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -1619,11 +1648,11 @@
 	};
 
 /***/ },
-/* 81 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var global    = __webpack_require__(6)
-	  , macrotask = __webpack_require__(79).set
+	  , macrotask = __webpack_require__(81).set
 	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
 	  , process   = global.process
 	  , Promise   = global.Promise
@@ -1688,7 +1717,7 @@
 	};
 
 /***/ },
-/* 82 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var hide = __webpack_require__(10);
@@ -1700,7 +1729,7 @@
 	};
 
 /***/ },
-/* 83 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1719,7 +1748,7 @@
 	};
 
 /***/ },
-/* 84 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ITERATOR     = __webpack_require__(61)('iterator')
@@ -1745,7 +1774,7 @@
 	};
 
 /***/ },
-/* 85 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(fetch) {'use strict';
@@ -1758,11 +1787,11 @@
 	
 	var _getIterator3 = _interopRequireDefault(_getIterator2);
 	
-	var _stringify = __webpack_require__(87);
+	var _stringify = __webpack_require__(68);
 	
 	var _stringify2 = _interopRequireDefault(_stringify);
 	
-	var _promise = __webpack_require__(68);
+	var _promise = __webpack_require__(70);
 	
 	var _promise2 = _interopRequireDefault(_promise);
 	
@@ -1796,55 +1825,47 @@
 				var _this = this;
 	
 				return new _promise2.default(function (resolve) {
-					var villages = window.localStorage.getItem('twtVillages');
+					_this._getOverviewHtml(function (response) {
+						var matches = response.match(/<a href=".*;screen=overview">[\s\S]*?<\/a>/gi),
+						    villages = [];
 	
-					if (villages === null) {
-						console.log('Villages from ajax');
-						_this._getOverviewHtml(function (response) {
-							var matches = response.match(/<a href=".*;screen=overview">[\s\S]*?<\/a>/gi),
-							    villages = [];
+						var _iteratorNormalCompletion = true;
+						var _didIteratorError = false;
+						var _iteratorError = undefined;
 	
-							var _iteratorNormalCompletion = true;
-							var _didIteratorError = false;
-							var _iteratorError = undefined;
+						try {
+							for (var _iterator = (0, _getIterator3.default)(matches), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+								var match = _step.value;
 	
+								var element = document.createElement('div'),
+								    village = {};
+	
+								element.innerHTML = match;
+	
+								village.id = match.match(/village=([0-9]+)/)[1];
+								village.name = element.querySelector('.quickedit-label').innerText.trim();
+	
+								villages.push(village);
+							}
+						} catch (err) {
+							_didIteratorError = true;
+							_iteratorError = err;
+						} finally {
 							try {
-								for (var _iterator = (0, _getIterator3.default)(matches), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-									var match = _step.value;
-	
-									var element = document.createElement('div'),
-									    village = {};
-	
-									element.innerHTML = match;
-	
-									village.id = match.match(/village=([0-9]+)/)[1];
-									village.name = element.querySelector('.quickedit-label').innerText.trim();
-	
-									villages.push(village);
+								if (!_iteratorNormalCompletion && _iterator.return) {
+									_iterator.return();
 								}
-							} catch (err) {
-								_didIteratorError = true;
-								_iteratorError = err;
 							} finally {
-								try {
-									if (!_iteratorNormalCompletion && _iterator.return) {
-										_iterator.return();
-									}
-								} finally {
-									if (_didIteratorError) {
-										throw _iteratorError;
-									}
+								if (_didIteratorError) {
+									throw _iteratorError;
 								}
 							}
+						}
 	
-							window.localStorage.setItem('twtVillages', (0, _stringify2.default)(villages));
+						window.localStorage.setItem('twtVillages', (0, _stringify2.default)(villages));
 	
-							resolve(villages);
-						});
-					} else {
-						console.log('Villages from localstorage');
-						resolve(JSON.parse(villages));
-					}
+						resolve(villages);
+					});
 				});
 			}
 		}]);
@@ -1853,10 +1874,10 @@
 	
 	Overview.urlPath = '/game.php?screen=overview_villages';
 	exports.default = new Overview();
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(86)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
 /***/ },
-/* 86 */
+/* 88 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*** IMPORTS FROM imports-loader ***/
@@ -2259,22 +2280,6 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 87 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(88), __esModule: true };
-
-/***/ },
-/* 88 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var core  = __webpack_require__(7)
-	  , $JSON = core.JSON || (core.JSON = {stringify: JSON.stringify});
-	module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
-	  return $JSON.stringify.apply($JSON, arguments);
-	};
-
-/***/ },
 /* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2288,7 +2293,7 @@
 	
 	var _getIterator3 = _interopRequireDefault(_getIterator2);
 	
-	var _promise = __webpack_require__(68);
+	var _promise = __webpack_require__(70);
 	
 	var _promise2 = _interopRequireDefault(_promise);
 	
@@ -2410,7 +2415,7 @@
 	}();
 	
 	exports.default = Village;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(86)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
 /***/ }
 /******/ ]);

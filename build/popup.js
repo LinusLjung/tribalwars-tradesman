@@ -1133,18 +1133,20 @@
 /* 67 */,
 /* 68 */,
 /* 69 */,
-/* 70 */
+/* 70 */,
+/* 71 */,
+/* 72 */
 /***/ function(module, exports) {
 
 
 
 /***/ },
-/* 71 */,
-/* 72 */,
 /* 73 */,
 /* 74 */,
 /* 75 */,
-/* 76 */
+/* 76 */,
+/* 77 */,
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// Works with __proto__ only. Old v8 can't work with null proto objects.
@@ -1159,7 +1161,7 @@
 	  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
 	    function(test, buggy, set){
 	      try {
-	        set = __webpack_require__(8)(Function.call, __webpack_require__(77).f(Object.prototype, '__proto__').set, 2);
+	        set = __webpack_require__(8)(Function.call, __webpack_require__(79).f(Object.prototype, '__proto__').set, 2);
 	        set(test, []);
 	        buggy = !(test instanceof Array);
 	      } catch(e){ buggy = true; }
@@ -1174,7 +1176,7 @@
 	};
 
 /***/ },
-/* 77 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var pIE            = __webpack_require__(40)
@@ -1195,8 +1197,6 @@
 	};
 
 /***/ },
-/* 78 */,
-/* 79 */,
 /* 80 */,
 /* 81 */,
 /* 82 */,
@@ -1321,7 +1321,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(100);
-	__webpack_require__(70);
+	__webpack_require__(72);
 	module.exports = __webpack_require__(7).Symbol;
 
 /***/ },
@@ -1351,7 +1351,7 @@
 	  , createDesc     = __webpack_require__(19)
 	  , _create        = __webpack_require__(57)
 	  , gOPNExt        = __webpack_require__(105)
-	  , $GOPD          = __webpack_require__(77)
+	  , $GOPD          = __webpack_require__(79)
 	  , $DP            = __webpack_require__(11)
 	  , gOPD           = $GOPD.f
 	  , dP             = $DP.f
@@ -1755,7 +1755,7 @@
 
 	// 19.1.3.19 Object.setPrototypeOf(O, proto)
 	var $export = __webpack_require__(5);
-	$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(76).set});
+	$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(78).set});
 
 /***/ },
 /* 111 */

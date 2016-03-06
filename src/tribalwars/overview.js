@@ -11,34 +11,26 @@ class Overview {
 
 	getVillageList() {
 		return new Promise((resolve) => {
-			const villages = window.localStorage.getItem('twtVillages');
+			this._getOverviewHtml((response) => {
+				const matches = response.match(/<a href=".*;screen=overview">[\s\S]*?<\/a>/gi),
+					villages = [];
 
-			if (villages === null) {
-				console.log('Villages from ajax');
-				this._getOverviewHtml((response) => {
-					const matches = response.match(/<a href=".*;screen=overview">[\s\S]*?<\/a>/gi),
-						villages = [];
+				for (let match of matches) {
+					const element = document.createElement('div'),
+						village = {};
 
-					for (let match of matches) {
-						const element = document.createElement('div'),
-							village = {};
+					element.innerHTML = match;
 
-						element.innerHTML = match;
+					village.id = match.match(/village=([0-9]+)/)[1];
+					village.name = element.querySelector('.quickedit-label').innerText.trim();
 
-						village.id = match.match(/village=([0-9]+)/)[1];
-						village.name = element.querySelector('.quickedit-label').innerText.trim();
+					villages.push(village);
+				}
 
-						villages.push(village);
-					}
+				window.localStorage.setItem('twtVillages', JSON.stringify(villages));
 
-					window.localStorage.setItem('twtVillages', JSON.stringify(villages));
-
-					resolve(villages);
-				});
-			} else {
-				console.log('Villages from localstorage');
-				resolve(JSON.parse(villages));
-			}
+				resolve(villages);
+			});
 		});
 	}
 }
