@@ -44,9 +44,11 @@ function init() {
 function handleVillages(data) {
 	const newState = Object.assign({}, state);
 
+	console.log(data);
+
 	Object.assign(newState.worlds, {
-		[data.id]: {
-			villages: data.villages
+		[data.worldId]: {
+			villages: data.data
 		}
 	});
 

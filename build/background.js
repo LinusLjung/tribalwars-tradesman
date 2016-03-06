@@ -107,8 +107,10 @@
 	function handleVillages(data) {
 		var newState = (0, _assign2.default)({}, state);
 	
-		(0, _assign2.default)(newState.worlds, (0, _defineProperty3.default)({}, data.id, {
-			villages: data.villages
+		console.log(data);
+	
+		(0, _assign2.default)(newState.worlds, (0, _defineProperty3.default)({}, data.worldId, {
+			villages: data.data
 		}));
 	
 		setState(newState);
