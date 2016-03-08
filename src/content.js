@@ -1,28 +1,11 @@
-import overview from './tribalwars/overview';
-import Village from './tribalwars/village';
+import overview from 'tribalwars/overview';
+import Village from 'tribalwars/village';
+import Market from 'tribalwars/market';
 import chrome from 'chrome';
 
 let backgroundPort,
-	worldId;
-
-if (window.location.pathname === '/game.php') {
-	worldId = window.location.host.match(/^([a-z]+[0-9]+)\./)[1];
-
-	console.log('Logged in');
-
-	backgroundPort = chrome.runtime.connect();
-
-	backgroundPort.onMessage.addListener(function (message) {
-		switch (message.type) {
-			case 'getVillages':
-				buildVillageData().then(sendVillageData);
-
-				break;
-		}
-	});
-} else {
-	console.log('Not logged in');
-}
+	worldId,
+	state = {};
 
 function buildVillageData() {
 	return new Promise((resolve) => {
@@ -59,10 +42,40 @@ function buildVillageData() {
 	});
 }
 
+function handleStateChange() {
+	console.log(state);
+}
+
 function sendVillageData(data) {
 	backgroundPort.postMessage({
 		type: 'villages',
 		worldId,
 		data
 	});
+}
+
+if (window.location.pathname === '/game.php') {
+	worldId = window.location.host.match(/^([a-z]+[0-9]+)\./)[1];
+
+	console.log('Logged in');
+
+	backgroundPort = chrome.runtime.connect();
+
+	backgroundPort.onMessage.addListener(function (message) {
+		switch (message.type) {
+			case 'getVillages':
+				buildVillageData().then(sendVillageData);
+
+				break;
+
+			case 'state':
+				state = message.state;
+
+				handleStateChange();
+
+				break;
+		}
+	});
+} else {
+	console.log('Not logged in');
 }

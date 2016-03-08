@@ -1,6 +1,9 @@
+import config from './config';
+import util from 'lib/util';
+
 class Village {
 	constructor(id) {
-		this.url = `/game.php?village=${id}`;
+		this.url = `${config.basePath}?village=${id}`;
 	}
 
 	getBuildings() {
@@ -10,21 +13,19 @@ class Village {
 			})
 				.then(response => response.text())
 				.then((response) => {
-					const element = document.createElement('div'),
+					const html = util.createContainer(response),
 						buildingData = {};
 
 					let buildings,
 						visualView;
 
-					element.innerHTML = response;
-
 					try {
-						buildings = element.querySelector('#buildings_visual')
+						buildings = html.querySelector('#buildings_visual')
 							.querySelectorAll('[id^=l_]');
 
 						visualView = true;
 					} catch (e) {
-						buildings = element.querySelector('#show_summary')
+						buildings = html.querySelector('#show_summary')
 							.querySelectorAll('[id^=l_]');
 
 						visualView = false;

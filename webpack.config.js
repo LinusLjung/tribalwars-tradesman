@@ -12,6 +12,11 @@ module.exports = {
 		path: __dirname + '/build',
 		filename: '[name].js'
 	},
+	resolve: {
+		root: [
+			path.resolve('./src/')
+		],
+	},
 	devtool: 'source-map',
 	module: {
 		loaders: [

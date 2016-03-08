@@ -62,9 +62,13 @@
 	
 	var _overview2 = _interopRequireDefault(_overview);
 	
-	var _village = __webpack_require__(89);
+	var _village = __webpack_require__(91);
 	
 	var _village2 = _interopRequireDefault(_village);
+	
+	var _market = __webpack_require__(120);
+	
+	var _market2 = _interopRequireDefault(_market);
 	
 	var _chrome = __webpack_require__(42);
 	
@@ -73,26 +77,8 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var backgroundPort = void 0,
-	    worldId = void 0;
-	
-	if (window.location.pathname === '/game.php') {
-		worldId = window.location.host.match(/^([a-z]+[0-9]+)\./)[1];
-	
-		console.log('Logged in');
-	
-		backgroundPort = _chrome2.default.runtime.connect();
-	
-		backgroundPort.onMessage.addListener(function (message) {
-			switch (message.type) {
-				case 'getVillages':
-					buildVillageData().then(sendVillageData);
-	
-					break;
-			}
-		});
-	} else {
-		console.log('Not logged in');
-	}
+	    worldId = void 0,
+	    state = {};
 	
 	function buildVillageData() {
 		return new _promise2.default(function (resolve) {
@@ -154,12 +140,42 @@
 		});
 	}
 	
+	function handleStateChange() {
+		console.log(state);
+	}
+	
 	function sendVillageData(data) {
 		backgroundPort.postMessage({
 			type: 'villages',
 			worldId: worldId,
 			data: data
 		});
+	}
+	
+	if (window.location.pathname === '/game.php') {
+		worldId = window.location.host.match(/^([a-z]+[0-9]+)\./)[1];
+	
+		console.log('Logged in');
+	
+		backgroundPort = _chrome2.default.runtime.connect();
+	
+		backgroundPort.onMessage.addListener(function (message) {
+			switch (message.type) {
+				case 'getVillages':
+					buildVillageData().then(sendVillageData);
+	
+					break;
+	
+				case 'state':
+					state = message.state;
+	
+					handleStateChange();
+	
+					break;
+			}
+		});
+	} else {
+		console.log('Not logged in');
 	}
 
 /***/ },
@@ -1803,6 +1819,14 @@
 	
 	var _createClass3 = _interopRequireDefault(_createClass2);
 	
+	var _config = __webpack_require__(89);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _util = __webpack_require__(90);
+	
+	var _util2 = _interopRequireDefault(_util);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var Overview = function () {
@@ -1811,21 +1835,12 @@
 		}
 	
 		(0, _createClass3.default)(Overview, [{
-			key: '_getOverviewHtml',
-			value: function _getOverviewHtml(handleResponse) {
-				fetch(Overview.urlPath, {
-					credentials: 'include'
-				}).then(function (response) {
-					return response.text();
-				}).then(handleResponse);
-			}
-		}, {
 			key: 'getVillageList',
 			value: function getVillageList() {
 				var _this = this;
 	
 				return new _promise2.default(function (resolve) {
-					_this._getOverviewHtml(function (response) {
+					_this._getOverviewHtml().then(function (response) {
 						var matches = response.match(/<a href=".*;screen=overview">[\s\S]*?<\/a>/gi),
 						    villages = [];
 	
@@ -1837,13 +1852,11 @@
 							for (var _iterator = (0, _getIterator3.default)(matches), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 								var match = _step.value;
 	
-								var element = document.createElement('div'),
+								var html = _util2.default.createContainer(match),
 								    village = {};
 	
-								element.innerHTML = match;
-	
 								village.id = match.match(/village=([0-9]+)/)[1];
-								village.name = element.querySelector('.quickedit-label').innerText.trim();
+								village.name = html.querySelector('.quickedit-label').innerText.trim();
 	
 								villages.push(village);
 							}
@@ -1868,11 +1881,24 @@
 					});
 				});
 			}
+		}, {
+			key: '_getOverviewHtml',
+			value: function _getOverviewHtml() {
+				return new _promise2.default(function (resolve) {
+					fetch(Overview.urlPath, {
+						credentials: 'include'
+					}).then(function (response) {
+						return response.text();
+					}).then(function (response) {
+						return resolve(response);
+					});
+				});
+			}
 		}]);
 		return Overview;
 	}();
 	
-	Overview.urlPath = '/game.php?screen=overview_villages';
+	Overview.urlPath = _config2.default.basePath + '?screen=overview_villages';
 	exports.default = new Overview();
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
@@ -2281,6 +2307,38 @@
 
 /***/ },
 /* 89 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = {
+		basePath: '/game.php'
+	};
+
+/***/ },
+/* 90 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = {
+		createContainer: function createContainer(html) {
+			var element = document.createElement('div');
+	
+			element.innerHTML = html;
+	
+			return element;
+		}
+	};
+
+/***/ },
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(fetch) {'use strict';
@@ -2305,13 +2363,21 @@
 	
 	var _createClass3 = _interopRequireDefault(_createClass2);
 	
+	var _config = __webpack_require__(89);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _util = __webpack_require__(90);
+	
+	var _util2 = _interopRequireDefault(_util);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var Village = function () {
 		function Village(id) {
 			(0, _classCallCheck3.default)(this, Village);
 	
-			this.url = '/game.php?village=' + id;
+			this.url = _config2.default.basePath + '?village=' + id;
 		}
 	
 		(0, _createClass3.default)(Village, [{
@@ -2325,20 +2391,18 @@
 					}).then(function (response) {
 						return response.text();
 					}).then(function (response) {
-						var element = document.createElement('div'),
+						var html = _util2.default.createContainer(response),
 						    buildingData = {};
 	
 						var buildings = void 0,
 						    visualView = void 0;
 	
-						element.innerHTML = response;
-	
 						try {
-							buildings = element.querySelector('#buildings_visual').querySelectorAll('[id^=l_]');
+							buildings = html.querySelector('#buildings_visual').querySelectorAll('[id^=l_]');
 	
 							visualView = true;
 						} catch (e) {
-							buildings = element.querySelector('#show_summary').querySelectorAll('[id^=l_]');
+							buildings = html.querySelector('#show_summary').querySelectorAll('[id^=l_]');
 	
 							visualView = false;
 						}
@@ -2415,6 +2479,106 @@
 	}();
 	
 	exports.default = Village;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
+
+/***/ },
+/* 92 */,
+/* 93 */,
+/* 94 */,
+/* 95 */,
+/* 96 */,
+/* 97 */,
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */,
+/* 107 */,
+/* 108 */,
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */,
+/* 118 */,
+/* 119 */,
+/* 120 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(fetch) {'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _promise = __webpack_require__(70);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _classCallCheck2 = __webpack_require__(44);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(45);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _config = __webpack_require__(89);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _util = __webpack_require__(90);
+	
+	var _util2 = _interopRequireDefault(_util);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Market = function () {
+		function Market(villageId) {
+			var mode = arguments.length <= 1 || arguments[1] === undefined ? Market.modes.PREMIUM : arguments[1];
+			(0, _classCallCheck3.default)(this, Market);
+	
+			this.id = villageId;
+			this.url = _config2.default.basePath + '?village=' + villageId + '&screen=market&mode=' + mode;
+		}
+	
+		(0, _createClass3.default)(Market, [{
+			key: 'getData',
+			value: function getData() {
+				this._getHtml().then(function (response) {
+					console.log(_util2.default.createContainer(response));
+				});
+			}
+		}, {
+			key: '_getHtml',
+			value: function _getHtml() {
+				var _this = this;
+	
+				return new _promise2.default(function (resolve) {
+					fetch(_this.url).then(function (response) {
+						return response.text();
+					}).then(function (response) {
+						return resolve(response);
+					});
+				});
+			}
+		}]);
+		return Market;
+	}();
+	
+	Market.modes = {
+		DEFAULT: 'other_offer',
+		PREMIUM: 'exchange'
+	};
+	exports.default = Market;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
 /***/ }

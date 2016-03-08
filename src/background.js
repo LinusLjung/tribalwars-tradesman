@@ -1,5 +1,5 @@
 import chrome from 'chrome';
-import Message from './chrome/message';
+import Message from 'chrome/message';
 
 const ports = [];
 
@@ -66,6 +66,13 @@ function setState(newState) {
 }
 
 function onStateChange() {
+	ports.forEach(function (port) {
+		port.postMessage({
+			type: 'state',
+			data: state
+		});
+	});
+
 	console.log('State updated:', state);
 }
 

@@ -127,6 +127,13 @@
 	}
 	
 	function onStateChange() {
+		ports.forEach(function (port) {
+			port.postMessage({
+				type: 'state',
+				data: state
+			});
+		});
+	
 		console.log('State updated:', state);
 	}
 	
