@@ -3,5 +3,6 @@
   "esnext": true,
   "validateIndentation": "\t",
   "requireTrailingComma": false,
-  "disallowMultipleVarDecl": null
+  "disallowMultipleVarDecl": null,
+  "disallowEmptyBlocks": false
 }

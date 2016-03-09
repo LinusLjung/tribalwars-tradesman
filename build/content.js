@@ -66,7 +66,7 @@
 	
 	var _village2 = _interopRequireDefault(_village);
 	
-	var _market = __webpack_require__(120);
+	var _market = __webpack_require__(92);
 	
 	var _market2 = _interopRequireDefault(_market);
 	
@@ -78,7 +78,9 @@
 	
 	var backgroundPort = void 0,
 	    worldId = void 0,
-	    state = {};
+	    state = {
+		worlds: {}
+	};
 	
 	function buildVillageData() {
 		return new _promise2.default(function (resolve) {
@@ -141,7 +143,13 @@
 	}
 	
 	function handleStateChange() {
-		console.log(state);
+		if (state.worlds[worldId]) {
+			var market = new _market2.default(state.worlds[worldId].villages[0].id);
+	
+			market.getData().then(function (data) {
+				console.log(data);
+			});
+		}
 	}
 	
 	function sendVillageData(data) {
@@ -167,7 +175,7 @@
 					break;
 	
 				case 'state':
-					state = message.state;
+					state = message.data;
 	
 					handleStateChange();
 	
@@ -2334,6 +2342,16 @@
 			element.innerHTML = html;
 	
 			return element;
+		},
+		clockStringToSeconds: function clockStringToSeconds(clockString) {
+			var clockArr = clockString.split(':'),
+			    sum = 0;
+	
+			sum += parseInt(clockArr[0], 10) * 60 * 60;
+			sum += parseInt(clockArr[1], 10) * 60;
+			sum += parseInt(clockArr[2], 10);
+	
+			return sum;
 		}
 	};
 
@@ -2482,35 +2500,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
 /***/ },
-/* 92 */,
-/* 93 */,
-/* 94 */,
-/* 95 */,
-/* 96 */,
-/* 97 */,
-/* 98 */,
-/* 99 */,
-/* 100 */,
-/* 101 */,
-/* 102 */,
-/* 103 */,
-/* 104 */,
-/* 105 */,
-/* 106 */,
-/* 107 */,
-/* 108 */,
-/* 109 */,
-/* 110 */,
-/* 111 */,
-/* 112 */,
-/* 113 */,
-/* 114 */,
-/* 115 */,
-/* 116 */,
-/* 117 */,
-/* 118 */,
-/* 119 */,
-/* 120 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(fetch) {'use strict';
@@ -2518,6 +2508,14 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
+	
+	var _keys = __webpack_require__(121);
+	
+	var _keys2 = _interopRequireDefault(_keys);
+	
+	var _getIterator2 = __webpack_require__(46);
+	
+	var _getIterator3 = _interopRequireDefault(_getIterator2);
 	
 	var _promise = __webpack_require__(70);
 	
@@ -2543,7 +2541,7 @@
 	
 	var Market = function () {
 		function Market(villageId) {
-			var mode = arguments.length <= 1 || arguments[1] === undefined ? Market.modes.PREMIUM : arguments[1];
+			var mode = arguments.length <= 1 || arguments[1] === undefined ? Market.modes.DEFAULT : arguments[1];
 			(0, _classCallCheck3.default)(this, Market);
 	
 			this.id = villageId;
@@ -2553,22 +2551,91 @@
 		(0, _createClass3.default)(Market, [{
 			key: 'getData',
 			value: function getData() {
-				this._getHtml().then(function (response) {
-					console.log(_util2.default.createContainer(response));
+				var _this = this;
+	
+				return new _promise2.default(function (resolve) {
+					_this._getHtml().then(function (response) {
+						//Find correct table by assuming it's always directly after the filter
+						var rows = _util2.default.createContainer(response).querySelectorAll('#offer_filter + .vis tr'),
+						    parsedRows = [];
+	
+						var _iteratorNormalCompletion = true;
+						var _didIteratorError = false;
+						var _iteratorError = undefined;
+	
+						try {
+							for (var _iterator = (0, _getIterator3.default)(rows), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+								var row = _step.value;
+	
+								var cells = row.querySelectorAll('td'),
+								    player = void 0;
+	
+								// Only process rows that has offers made by a player
+								if (cells[2] && (player = cells[2].querySelector(':scope > a'))) {
+									parsedRows.push({
+										receive: _this._parseResource(cells[0]),
+										offer: _this._parseResource(cells[1]),
+										player: parseInt(player.href.match(/id=([0-9]+)/)[1]),
+										duration: _util2.default.clockStringToSeconds(cells[3].innerText),
+										ratio: parseFloat(cells[4].innerText, 10),
+										amount: parseInt(cells[5].innerText)
+									});
+								}
+							}
+						} catch (err) {
+							_didIteratorError = true;
+							_iteratorError = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion && _iterator.return) {
+									_iterator.return();
+								}
+							} finally {
+								if (_didIteratorError) {
+									throw _iteratorError;
+								}
+							}
+						}
+	
+						resolve(parsedRows);
+					});
 				});
 			}
 		}, {
 			key: '_getHtml',
 			value: function _getHtml() {
-				var _this = this;
+				var _this2 = this;
 	
 				return new _promise2.default(function (resolve) {
-					fetch(_this.url).then(function (response) {
+					fetch(_this2.url, {
+						credentials: 'include'
+					}).then(function (response) {
 						return response.text();
 					}).then(function (response) {
 						return resolve(response);
 					});
 				});
+			}
+		}, {
+			key: '_parseResource',
+			value: function _parseResource(resource) {
+				var resourceTypes = (0, _keys2.default)(Market.resourceTypes).map(function (resourceType) {
+					return Market.resourceTypes[resourceType];
+				}),
+				    iconClassList = resource.querySelector(resourceTypes.map(function (resourceType) {
+					return '.' + resourceType;
+				}).join(', ')).classList;
+	
+				var type = void 0,
+				    i = 0;
+	
+				// Find which of the resource types the icon has as className
+				while (i < resourceTypes.length && !iconClassList.contains(type = resourceTypes[i++])) {}
+	
+				return {
+					type: type,
+					value: parseInt(resource.innerText.replace('.', ''), 10)
+				};
 			}
 		}]);
 		return Market;
@@ -2578,8 +2645,82 @@
 		DEFAULT: 'other_offer',
 		PREMIUM: 'exchange'
 	};
+	Market.resourceTypes = {
+		WOOD: 'wood',
+		STONE: 'stone',
+		IRON: 'iron'
+	};
 	exports.default = Market;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
+
+/***/ },
+/* 93 */,
+/* 94 */,
+/* 95 */,
+/* 96 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// most Object methods by ES6 should accept primitives
+	var $export = __webpack_require__(5)
+	  , core    = __webpack_require__(7)
+	  , fails   = __webpack_require__(16);
+	module.exports = function(KEY, exec){
+	  var fn  = (core.Object || {})[KEY] || Object[KEY]
+	    , exp = {};
+	  exp[KEY] = exec(fn);
+	  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
+	};
+
+/***/ },
+/* 97 */,
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */,
+/* 107 */,
+/* 108 */,
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */,
+/* 118 */,
+/* 119 */,
+/* 120 */,
+/* 121 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(122), __esModule: true };
+
+/***/ },
+/* 122 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(123);
+	module.exports = __webpack_require__(7).Object.keys;
+
+/***/ },
+/* 123 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.14 Object.keys(O)
+	var toObject = __webpack_require__(41)
+	  , $keys    = __webpack_require__(24);
+	
+	__webpack_require__(96)('keys', function(){
+	  return function keys(it){
+	    return $keys(toObject(it));
+	  };
+	});
 
 /***/ }
 /******/ ]);

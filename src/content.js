@@ -5,7 +5,9 @@ import chrome from 'chrome';
 
 let backgroundPort,
 	worldId,
-	state = {};
+	state = {
+		worlds: {}
+	};
 
 function buildVillageData() {
 	return new Promise((resolve) => {
@@ -43,7 +45,13 @@ function buildVillageData() {
 }
 
 function handleStateChange() {
-	console.log(state);
+	if (state.worlds[worldId]) {
+		let market = new Market(state.worlds[worldId].villages[0].id);
+
+		market.getData().then((data) => {
+			console.log(data);
+		});
+	}
 }
 
 function sendVillageData(data) {
@@ -69,7 +77,7 @@ if (window.location.pathname === '/game.php') {
 				break;
 
 			case 'state':
-				state = message.state;
+				state = message.data;
 
 				handleStateChange();
 
