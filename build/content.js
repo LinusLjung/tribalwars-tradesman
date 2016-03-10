@@ -82,7 +82,7 @@
 		worlds: {}
 	};
 	
-	function buildVillageData() {
+	function buildWorldData() {
 		return new _promise2.default(function (resolve) {
 			var villageList = window.localStorage.getItem('twtVillages');
 	
@@ -92,7 +92,9 @@
 						if (villagesData.length === villages.length) {
 							window.localStorage.setItem('twtVillages', (0, _stringify2.default)(villagesData));
 							console.log('Saved to localstorage:', villagesData);
-							resolve(villagesData);
+							resolve({
+								villages: villagesData
+							});
 						}
 					}
 	
@@ -137,7 +139,9 @@
 				});
 			} else {
 				console.log('Fetched from localstorage:', JSON.parse(villageList));
-				resolve(JSON.parse(villageList));
+				resolve({
+					villages: JSON.parse(villageList)
+				});
 			}
 		});
 	}
@@ -152,10 +156,9 @@
 		}
 	}
 	
-	function sendVillageData(data) {
+	function sendWorldData(data) {
 		backgroundPort.postMessage({
-			type: 'villages',
-			worldId: worldId,
+			type: 'worldData',
 			data: data
 		});
 	}
@@ -167,13 +170,19 @@
 	
 		backgroundPort = _chrome2.default.runtime.connect();
 	
+		backgroundPort.postMessage({
+			type: 'register',
+			data: {
+				worldId: worldId
+			}
+		});
+	
 		backgroundPort.onMessage.addListener(function (message) {
 			switch (message.type) {
-				case 'getVillages':
-					buildVillageData().then(sendVillageData);
+				case 'getWorldData':
+					buildWorldData().then(sendWorldData);
 	
 					break;
-	
 				case 'state':
 					state = message.data;
 	
@@ -2509,7 +2518,7 @@
 		value: true
 	});
 	
-	var _keys = __webpack_require__(121);
+	var _keys = __webpack_require__(93);
 	
 	var _keys2 = _interopRequireDefault(_keys);
 	
@@ -2654,9 +2663,33 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(88)))
 
 /***/ },
-/* 93 */,
-/* 94 */,
-/* 95 */,
+/* 93 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(94), __esModule: true };
+
+/***/ },
+/* 94 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(95);
+	module.exports = __webpack_require__(7).Object.keys;
+
+/***/ },
+/* 95 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.14 Object.keys(O)
+	var toObject = __webpack_require__(41)
+	  , $keys    = __webpack_require__(24);
+	
+	__webpack_require__(96)('keys', function(){
+	  return function keys(it){
+	    return $keys(toObject(it));
+	  };
+	});
+
+/***/ },
 /* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2670,57 +2703,6 @@
 	  exp[KEY] = exec(fn);
 	  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
 	};
-
-/***/ },
-/* 97 */,
-/* 98 */,
-/* 99 */,
-/* 100 */,
-/* 101 */,
-/* 102 */,
-/* 103 */,
-/* 104 */,
-/* 105 */,
-/* 106 */,
-/* 107 */,
-/* 108 */,
-/* 109 */,
-/* 110 */,
-/* 111 */,
-/* 112 */,
-/* 113 */,
-/* 114 */,
-/* 115 */,
-/* 116 */,
-/* 117 */,
-/* 118 */,
-/* 119 */,
-/* 120 */,
-/* 121 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(122), __esModule: true };
-
-/***/ },
-/* 122 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(123);
-	module.exports = __webpack_require__(7).Object.keys;
-
-/***/ },
-/* 123 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.14 Object.keys(O)
-	var toObject = __webpack_require__(41)
-	  , $keys    = __webpack_require__(24);
-	
-	__webpack_require__(96)('keys', function(){
-	  return function keys(it){
-	    return $keys(toObject(it));
-	  };
-	});
 
 /***/ }
 /******/ ]);

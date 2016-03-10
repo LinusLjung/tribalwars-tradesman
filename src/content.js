@@ -9,7 +9,7 @@ let backgroundPort,
 		worlds: {}
 	};
 
-function buildVillageData() {
+function buildWorldData() {
 	return new Promise((resolve) => {
 		const villageList = window.localStorage.getItem('twtVillages');
 
@@ -19,7 +19,9 @@ function buildVillageData() {
 					if (villagesData.length === villages.length) {
 						window.localStorage.setItem('twtVillages', JSON.stringify(villagesData));
 						console.log('Saved to localstorage:', villagesData);
-						resolve(villagesData);
+						resolve({
+							villages: villagesData
+						});
 					}
 				}
 
@@ -39,7 +41,9 @@ function buildVillageData() {
 			});
 		} else {
 			console.log('Fetched from localstorage:', JSON.parse(villageList));
-			resolve(JSON.parse(villageList));
+			resolve({
+				villages: JSON.parse(villageList)
+			});
 		}
 	});
 }
@@ -54,10 +58,9 @@ function handleStateChange() {
 	}
 }
 
-function sendVillageData(data) {
+function sendWorldData(data) {
 	backgroundPort.postMessage({
-		type: 'villages',
-		worldId,
+		type: 'worldData',
 		data
 	});
 }
@@ -69,13 +72,19 @@ if (window.location.pathname === '/game.php') {
 
 	backgroundPort = chrome.runtime.connect();
 
+	backgroundPort.postMessage({
+		type: 'register',
+		data: {
+			worldId
+		}
+	});
+
 	backgroundPort.onMessage.addListener(function (message) {
 		switch (message.type) {
-			case 'getVillages':
-				buildVillageData().then(sendVillageData);
+			case 'getWorldData':
+				buildWorldData().then(sendWorldData);
 
 				break;
-
 			case 'state':
 				state = message.data;
 

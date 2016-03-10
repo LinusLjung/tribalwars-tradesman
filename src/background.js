@@ -1,7 +1,7 @@
 import chrome from 'chrome';
 import Message from 'chrome/message';
 
-const ports = [];
+const ports = {};
 
 const state = {
 	worlds: {}
@@ -9,25 +9,22 @@ const state = {
 
 function init() {
 	chrome.runtime.onConnect.addListener((port) => {
-		ports.push(port);
-
-		console.log('Connected ports:', ports.length);
-
 		port.onMessage.addListener((message) => {
 			switch (message.type) {
-				case 'villages':
-					handleVillages(message);
+				case 'register':
+					handlePortRegister(port, message.data);
+
+					break;
+				case 'worldData':
+					handleWorldData(port.data.worldId, message);
 
 					break;
 			}
 		});
 
 		port.onDisconnect.addListener((port) => {
-			ports.splice(ports.indexOf(port), 1);
-		});
-
-		port.postMessage({
-			type: 'getVillages'
+			ports[port.data.worldId].splice(ports[port.data.worldId].indexOf(port), 1);
+			console.log('Current ports:', ports);
 		});
 	});
 
@@ -41,15 +38,29 @@ function init() {
 	});
 }
 
-function handleVillages(data) {
+function handlePortRegister(port, data) {
+	port.data = data;
+
+	if (!ports[data.worldId]) {
+		ports[data.worldId] = [port];
+	} else {
+		ports[data.worldId].push(port);
+	}
+
+	console.log('Current ports:', ports);
+
+	if (!state.worlds[data.worldId]) {
+		port.postMessage({
+			type: 'getWorldData'
+		});
+	}
+}
+
+function handleWorldData(worldId, data) {
 	const newState = Object.assign({}, state);
 
-	console.log(data);
-
 	Object.assign(newState.worlds, {
-		[data.worldId]: {
-			villages: data.data
-		}
+		[worldId]: data.data
 	});
 
 	setState(newState);
@@ -66,12 +77,14 @@ function setState(newState) {
 }
 
 function onStateChange() {
-	ports.forEach(function (port) {
-		port.postMessage({
-			type: 'state',
-			data: state
+	for (let worldId in ports) {
+		ports[worldId].forEach(function (port) {
+			port.postMessage({
+				type: 'state',
+				data: state
+			});
 		});
-	});
+	}
 
 	console.log('State updated:', state);
 }

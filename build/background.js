@@ -64,7 +64,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var ports = [];
+	var ports = {};
 	
 	var state = {
 		worlds: {}
@@ -72,25 +72,22 @@
 	
 	function init() {
 		_chrome2.default.runtime.onConnect.addListener(function (port) {
-			ports.push(port);
-	
-			console.log('Connected ports:', ports.length);
-	
 			port.onMessage.addListener(function (message) {
 				switch (message.type) {
-					case 'villages':
-						handleVillages(message);
+					case 'register':
+						handlePortRegister(port, message.data);
+	
+						break;
+					case 'worldData':
+						handleWorldData(port.data.worldId, message);
 	
 						break;
 				}
 			});
 	
 			port.onDisconnect.addListener(function (port) {
-				ports.splice(ports.indexOf(port), 1);
-			});
-	
-			port.postMessage({
-				type: 'getVillages'
+				ports[port.data.worldId].splice(ports[port.data.worldId].indexOf(port), 1);
+				console.log('Current ports:', ports);
 			});
 		});
 	
@@ -104,14 +101,28 @@
 		});
 	}
 	
-	function handleVillages(data) {
+	function handlePortRegister(port, data) {
+		port.data = data;
+	
+		if (!ports[data.worldId]) {
+			ports[data.worldId] = [port];
+		} else {
+			ports[data.worldId].push(port);
+		}
+	
+		console.log('Current ports:', ports);
+	
+		if (!state.worlds[data.worldId]) {
+			port.postMessage({
+				type: 'getWorldData'
+			});
+		}
+	}
+	
+	function handleWorldData(worldId, data) {
 		var newState = (0, _assign2.default)({}, state);
 	
-		console.log(data);
-	
-		(0, _assign2.default)(newState.worlds, (0, _defineProperty3.default)({}, data.worldId, {
-			villages: data.data
-		}));
+		(0, _assign2.default)(newState.worlds, (0, _defineProperty3.default)({}, worldId, data.data));
 	
 		setState(newState);
 	}
@@ -127,12 +138,14 @@
 	}
 	
 	function onStateChange() {
-		ports.forEach(function (port) {
-			port.postMessage({
-				type: 'state',
-				data: state
+		for (var worldId in ports) {
+			ports[worldId].forEach(function (port) {
+				port.postMessage({
+					type: 'state',
+					data: state
+				});
 			});
-		});
+		}
 	
 		console.log('State updated:', state);
 	}
